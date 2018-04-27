@@ -1,0 +1,116 @@
+package edu.tzl.web.servlet;
+
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import com.jspsmart.upload.File;
+import com.jspsmart.upload.Files;
+import com.jspsmart.upload.Request;
+import com.jspsmart.upload.SmartUpload;
+import com.jspsmart.upload.SmartUploadException;
+
+
+
+
+
+import edu.tzl.web.dao.MproductDaoImp;
+import edu.tzl.web.entity.ProductClass;
+
+
+/**
+ * Servlet implementation class UploadServlet
+ */
+@WebServlet("/UploadServlet")
+public class UploadServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+    private final String SavePath="d://img/";
+    MproductDaoImp dao = new MproductDaoImp();
+    /**
+     * @see HttpServlet#HttpServlet()
+     */
+    public UploadServlet() {
+        super();
+        // TODO Auto-generated constructor stub
+    }
+
+   
+    
+	/**
+	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
+	 */
+	protected void service(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		/*request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");*/
+		String action=request.getParameter("action");
+		if("add".equals(action)){
+			try {
+				upload(request,response);
+				request.getRequestDispatcher("doManage.jsp").forward(request, response);
+			} catch (SmartUploadException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+	}
+
+
+	private void upload(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException, SmartUploadException {
+		/*request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		response.setContentType("text/html;charset=UTF-8");*/
+		String picture="";
+		//实锟斤拷锟斤拷锟较达拷锟斤拷锟斤拷械锟絪martupload锟斤拷锟斤拷    实锟斤拷锟较达拷
+		SmartUpload smartUpload=new SmartUpload();
+		//锟斤拷锟斤拷锟斤拷锟斤拷锟绞碉拷锟斤拷锟�
+		smartUpload.initialize(this.getServletConfig(),request,response);
+		//锟斤拷锟斤拷upload锟斤拷锟斤拷
+		smartUpload.upload();
+		//锟斤拷锟截憋拷jsp smartupload锟斤拷装锟斤拷锟絩equest锟斤拷锟斤拷
+		Request req=smartUpload.getRequest();
+		
+		//锟斤拷锟斤拷锟斤拷锟叫憋拷锟结交锟斤拷锟较达拷锟斤拷锟斤拷锟侥硷拷锟斤拷锟斤拷锟斤拷
+		Files files=smartUpload.getFiles();
+		for(int i=0;i<files.getCount();i++){
+			//锟斤拷锟斤拷jspSmartUpload锟斤拷锟斤拷械锟紽ile锟斤拷每一锟斤拷file锟斤拷锟斤拷锟斤拷锟揭伙拷锟絝orm锟斤拷锟斤拷锟侥硷拷锟斤拷
+			File file=files.getFile(i);
+			//锟斤拷取锟较达拷锟侥硷拷锟斤拷锟侥硷拷锟斤拷String filename=file.getFieldName();
+			picture=createfilename();
+			//锟斤拷锟较达拷锟斤拷锟侥硷拷锟斤拷锟叫憋拷锟芥到指锟斤拷位锟斤拷锟斤拷
+			file.saveAs(SavePath+picture);
+		}
+		String productName = req.getParameter("productName");
+		productName=new String(productName.getBytes("GBK"),"UTF-8");
+		
+		
+		int id = Integer.parseInt(req.getParameter("sel"));
+		String photo =req.getParameter("photo");
+		float productPrice = Float.valueOf(req.getParameter("productPrice"));
+		
+		String productMiaoshu = req.getParameter("productMiaoshu");
+		productMiaoshu=new String(productMiaoshu.getBytes("GBK"),"UTF-8");
+		
+		
+		int productNuml = Integer.valueOf(req.getParameter("productNuml"));
+		ProductClass p = dao.querryByid(id);
+		int sid = p.getChildId();
+		System.out.println(productName+productMiaoshu);
+		dao.add(productName, productMiaoshu, productPrice, productNuml, id, sid, picture);
+	}
+
+	private String createfilename() {
+		// TODO Auto-generated method stub
+		SimpleDateFormat df=new SimpleDateFormat("yyyyMMddHHmmss");
+		return df.format(new Date())+".png";
+	}
+
+}

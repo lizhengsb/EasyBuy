@@ -1,0 +1,79 @@
+package edu.tzl.web.servlet;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.servlet.ServletException;
+import javax.servlet.annotation.WebServlet;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import edu.tzl.web.dao.MproductDaoImp;
+import edu.tzl.web.dao.ShoppingDaoImp;
+import edu.tzl.web.entity.Cart;
+import edu.tzl.web.entity.Product;
+
+/**
+ * Servlet implementation class ShoppingServlet
+ */
+@WebServlet("/ShoppingServlet")
+public class ShoppingServlet extends HttpServlet {
+	private static final long serialVersionUID = 1L;
+	ShoppingDaoImp dao = new ShoppingDaoImp();
+	MproductDaoImp daop=new MproductDaoImp();
+	/**
+	 * @see HttpServlet#HttpServlet()
+	 */
+	public ShoppingServlet() {
+		super();
+		// TODO Auto-generated constructor stub
+	}
+
+	/**
+	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse
+	 *      response)
+	 */
+	protected void service(HttpServletRequest request,
+			HttpServletResponse response) throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
+		response.setCharacterEncoding("UTF-8");
+		String action = request.getParameter("action");
+		if ("buy".equals(action)) {
+			int uid = Integer.valueOf(request.getParameter("uid"));
+			int pid = Integer.valueOf(request.getParameter("pid"));
+			int numl = 1;
+			float price = Float.valueOf(request.getParameter("price"));
+			// 判断购物车中是否存在此商品
+			Cart c = dao.selectCart(pid);
+			if (c == null) {
+				// 放入购物车
+				float total = numl * price;
+				dao.insert(uid, pid, numl, total);
+			} else {
+				System.out.println("p" + c.getNuml());
+				int numl1 = c.getNuml() + 1;
+				float total = numl1 * price;
+				dao.update(pid, numl1, total);
+			}
+			request.getRequestDispatcher("Ushopping.jsp").forward(request,
+					response);
+		}else if("cart".equals(action)){
+			int uid=Integer.valueOf(request.getParameter("uid"));
+			List<Cart> list=dao.qurryCart(uid);
+			
+			Product p=null;
+			List<Product> listurl=new ArrayList<Product>();
+			for(Cart c:list){
+				p=daop.querryProductByid(c.getProductid());
+				listurl.add(p);
+			}
+			request.setAttribute("carturl", listurl);
+			
+			request.setAttribute("cartlist", list);
+			request.getRequestDispatcher("shopping.jsp").forward(request, response);
+		}
+	}
+
+}

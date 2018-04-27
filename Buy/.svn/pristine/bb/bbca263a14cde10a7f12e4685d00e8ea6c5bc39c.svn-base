@@ -1,0 +1,8 @@
+package edu.tzl.web.dao;
+
+import java.sql.Connection;
+
+public class MnewsDaoImp extends BaseDao{
+	Connection conn=getconn();
+	String sql="insert into ";
+}

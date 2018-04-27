@@ -1,0 +1,7 @@
+package edu.tzl.web.entity;
+
+import java.util.List;
+
+public class CartHelp {
+	
+}
